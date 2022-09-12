@@ -38,6 +38,7 @@ public class MyServer extends Thread {
                 Socket nuevoCliente = servidor.accept();
                 MyClientThread tNuevoCliente = new MyClientThread(nuevoCliente);
                 tNuevoCliente.start();
+                System.out.println("Se ha conectado el cliente: "+nuevoCliente.getRemoteSocketAddress());
             }
 
 
