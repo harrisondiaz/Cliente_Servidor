@@ -1,40 +1,69 @@
 package server;
 
+import user.MyClientThread;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class MyServer {
+public class MyServer extends Thread {
+    private int puerto;
+    private boolean stop = false;
 
-    public static void main(String[] args) {
-
-            int port = 90;
-            boolean running = true;
-            MyServer myServer = new MyServer();
-            System.out.println("Server: ");
-            try {
-                ServerSocket serverSocket = new ServerSocket(port);
-                System.out.println("Host ip: " + serverSocket.getInetAddress().getHostAddress() + " Port " + serverSocket.getLocalPort());
-                while (running) {
-
-                    System.out.println("Esperando respuesta....");
-                    Socket socket = serverSocket.accept();
-                    System.out.println("Se conecto: " + socket.getInetAddress().getHostName());
-
-                    DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                    int data = dataInputStream.readInt();
-                    System.out.println("Recibi : " + data);
-
-                    dataInputStream.close();
-                    dataOutputStream.close();
-                }
-                serverSocket.close();
-            } catch (IOException e) {
-                System.out.println("Chale me desconecte: " + e);
-            }
-
+    public MyServer(int puerto) {
+        this.puerto = puerto;
     }
 
+
+    public int getPuerto() {
+        return puerto;
+    }
+
+
+    public void setPuerto(int puerto) {
+        this.puerto = puerto;
+    }
+
+    public void stopServer() {
+        this.stop = true;
+    }
+
+    public void run() {
+        ServerSocket servidor = null;
+        try {
+            servidor = new ServerSocket(this.puerto);
+            System.out.println("Esperando conexiones en el puerto " + this.puerto);
+
+            while (!stop) {
+                Socket nuevoCliente = servidor.accept();
+                MyClientThread tNuevoCliente = new MyClientThread(nuevoCliente);
+                tNuevoCliente.start();
+            }
+
+
+            servidor.close();
+            System.out.println("Servidor cerrado correctamente");
+
+        } catch (IOException e) {
+            System.out.println("Servidor cerrado abruptamente");
+            e.printStackTrace();
+        }finally {
+
+            if (servidor != null) {
+                try {
+                    servidor.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new MyServer(123).run();
+    }
 }
+
+
+
 

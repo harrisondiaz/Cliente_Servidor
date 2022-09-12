@@ -1,42 +1,72 @@
 package user;
+import server.MyServer;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Random;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class MyClient {
-    public static void main(String[] args) {
-        if(args.length==2) {
-            String ip = args[0];
-            int port = Integer.parseInt(args[1]);
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Client");
-            for (int i = 0; i < 50; i++) {
-                try {
-                    Socket socket = new Socket(ip, port);
-                    DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                    System.out.println("Digita un numero: ->");
-                    int data = Integer.parseInt(scanner.next());
-                            System.out.println("Numero Enviado : " + data);
-                    dataOutputStream.writeInt(data);
-                    System.out.println("Recibi : " + dataInputStream.readInt());
-                    dataInputStream.close();
-                    dataOutputStream.close();
-                    socket.close();
-                } catch (IOException e) {
-                    System.out.println("chale no me conecte");
-                }
+    private static final int BUFFER_SIZE = 8192;
+
+    private void run(){
+        byte [] data = new byte[BUFFER_SIZE];
+
+        DataInputStream input = null;
+        DataOutputStream output = null;
+        Socket socket = null;
+
+        try {
+
+            socket = new Socket("localhost", 123);
+            System.out.println("Conectado con: " + socket.getRemoteSocketAddress());
+
+
+            input = new DataInputStream(socket.getInputStream());
+            output = new DataOutputStream(socket.getOutputStream());
+
+            while (true) {
+                Scanner sc = new Scanner(System.in);
+                System.out.println("Mensaje:");
+                String phrase = sc.nextLine();
+                phrase = new String(phrase.getBytes(), StandardCharsets.UTF_8);
+
+                output.writeUTF(phrase);
             }
-        }else{
-            System.out.println("Parametros invalidos, se debe intentar con el parametro 186.114.217.12383 12383");
+
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("Conexion con el servidor cerrada \n Intentaremos conectarte");
+
+            run();
+
+        }finally {
+            try {
+                if (input != null) {
+                    input.close();
+                }
+
+                if (output != null) {
+                    output.close();
+                }
+
+                if (socket != null) {
+                    socket.close();
+                }
+            } catch (IOException e) {
+
+                e.printStackTrace();
+            }
+
         }
     }
+    public static void main(String[] args) {
+       new MyClient().run();
+    }
 }
-
