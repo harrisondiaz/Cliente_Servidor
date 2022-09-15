@@ -1,35 +1,47 @@
 package user;
 
+import server.MyConexion;
+
 import java.io.*;
 import java.net.Socket;
 
 public class MyClientThread extends Thread{
 
     private Socket cliente = null;
-    private DataOutputStream output = null;
-    private DataInputStream input = null;
+    private DataOutputStream output;
+    private DataInputStream input;
     private boolean stop = false;
     private static final int BUFFER_SIZE = 8192;
 
-    //Constructor, aquí pasamos el socket obtenido en la clase Servidor como resultado del método accept()
-    public MyClientThread(Socket cliente) {
+    public MyClientThread(Socket cliente) throws IOException {
         this.cliente = cliente;
+        input = new DataInputStream(cliente.getInputStream());
+        output = new DataOutputStream(cliente.getOutputStream());
     }
 
+    public DataInputStream getInput(){
+        return input;
+    }
+
+    public DataOutputStream getOutput(){
+        return output;
+    }
+
+    public void sentMsg(String phrase) throws IOException {
+        output.writeUTF(phrase);
+    }
+
+
     public void run() {
-        // Obtenemos los flujos
+
         try {
-            output = new DataOutputStream(this.cliente.getOutputStream());
-            input = new DataInputStream(this.cliente.getInputStream());
-            // Creamos un buffer de 8KB
+
+
             byte[] data = new byte[BUFFER_SIZE];
 
             while (!stop) {
                 String phrase = input.readUTF();
                 System.out.println(phrase);
-
-                output.writeUTF(phrase);
-
 
             }
 
@@ -39,7 +51,7 @@ public class MyClientThread extends Thread{
             parar();
         }
 
-        System.out.println("Thread finalizado");
+        System.out.println("Por fin se fue >:v");
 
     }
 
@@ -47,6 +59,7 @@ public class MyClientThread extends Thread{
         stop = true;
 
         try {
+
             if (output != null) {
                 output.close();
             }

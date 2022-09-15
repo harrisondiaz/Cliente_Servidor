@@ -1,10 +1,7 @@
 package user;
-import server.MyServer;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -28,22 +25,29 @@ public class MyClient {
 
             input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
-
-            while (true) {
-                Scanner sc = new Scanner(System.in);
-                System.out.println("Mensaje:");
-                String phrase = sc.nextLine();
-                phrase = new String(phrase.getBytes(), StandardCharsets.UTF_8);
-
-                output.writeUTF(phrase);
-            }
+             if(input.readUTF().equals("Por favor espere a conectarse")){
+                 System.out.println("Ups! No podemos conectarte ");
+                 new IOException();
+             }else{
+                 while (true) {
+                     Scanner sc = new Scanner(System.in);
+                     System.out.println("Mensaje:");
+                     String phrase = sc.nextLine();
+                     phrase = new String(phrase.getBytes(), StandardCharsets.UTF_8);
+                     output.writeUTF(phrase);
+                 }
+             }
 
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
             System.out.println("Conexion con el servidor cerrada \n Intentaremos conectarte");
-
+            try {
+                Thread.sleep(15000);
+            } catch (InterruptedException ex) {
+                System.out.println("Ups! se fue");
+            }
             run();
 
         }finally {
@@ -67,6 +71,6 @@ public class MyClient {
         }
     }
     public static void main(String[] args) {
-       new MyClient().run();
+        new MyClient().run();
     }
 }

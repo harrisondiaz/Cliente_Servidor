@@ -7,62 +7,27 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class MyServer extends Thread {
-    private int puerto;
-    private boolean stop = false;
 
-    public MyServer(int puerto) {
-        this.puerto = puerto;
+    private Socket service;
+    private DataInputStream input;
+    private DataOutputStream output;
+
+    public MyServer(Socket service,DataInputStream input,DataOutputStream output){
+        this.service = service;
+        this.input = input;
+        this.output = output;
     }
-
-
-    public int getPuerto() {
-        return puerto;
-    }
-
-
-    public void setPuerto(int puerto) {
-        this.puerto = puerto;
-    }
-
-    public void stopServer() {
-        this.stop = true;
-    }
-
     public void run() {
-        ServerSocket servidor = null;
-        try {
-            servidor = new ServerSocket(this.puerto);
-            System.out.println("Esperando conexiones en el puerto " + this.puerto);
+        System.out.println("Se acepto la conexión");
 
-            while (!stop) {
-                Socket nuevoCliente = servidor.accept();
-                MyClientThread tNuevoCliente = new MyClientThread(nuevoCliente);
-                tNuevoCliente.start();
-                System.out.println("Se ha conectado el cliente: "+nuevoCliente.getRemoteSocketAddress());
-            }
+        try{
 
-
-            servidor.close();
-            System.out.println("Servidor cerrado correctamente");
-
-        } catch (IOException e) {
-            System.out.println("Servidor cerrado abruptamente");
-            e.printStackTrace();
-        }finally {
-
-            if (servidor != null) {
-                try {
-                    servidor.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-            }
+        }catch (Exception e){
+            System.out.println();
         }
     }
 
-    public static void main(String[] args) {
-        new MyServer(123).run();
-    }
+
 }
 
 
